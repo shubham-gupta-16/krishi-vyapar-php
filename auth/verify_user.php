@@ -7,10 +7,10 @@ try {
     $auth = new PHPFastAuth(API::db());
     $token = API::getAuthToken();
     $uid = $auth->verifyToken($token);
-    // $user = $auth->getUser($uid);
+    $user = $auth->getUser($uid);
 
     API::printSuccess([
-        'name' => null
+        'name' => $user['name']
     ]);
 } catch (Exception $e) {
     API::printError($e);

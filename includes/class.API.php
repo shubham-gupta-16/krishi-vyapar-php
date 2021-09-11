@@ -1,15 +1,15 @@
 <?php
 header("Content-Type: application/json");
 
-require_once dirname(__FILE__) . '/class.Config.php';
-
-class API extends Config
+class API
 {
     const MISSING_PARAMS_MSG = 'Some Parameters are missing';
     const UNKNOWN_ERROR_MSG = 'Unknown Error Occured';
     const UNKNOWN_ERROR_CODE = 45;
     const MISSING_PARAMS_CODE = 12;
+    const DB_CONFIG_ERROR_CODE = 29;
     const STATUS_OK_CODE = 200;
+
 
     public static function getAuthToken()
     {
@@ -21,7 +21,18 @@ class API extends Config
         return null;
     }
 
-    public static function receivePOST(string $key, bool $important = false) : string
+    public static function db(): mysqli
+    {
+        $config = parse_ini_file("config.ini");
+        if (!$config) {
+            throw new Exception("DB Config Error", self::DB_CONFIG_ERROR_CODE);
+        }
+        $db = new mysqli($config['dbservername'], $config['dbuser'], $config['dbpassword'], $config['dbname']);
+        $db->options(MYSQLI_OPT_INT_AND_FLOAT_NATIVE, TRUE);
+        return $db;
+    }
+
+    public static function receivePOST(string $key, bool $important = false): string
     {
         // todo remove get => 
         if (isset($_GET[$key])) {
@@ -30,7 +41,17 @@ class API extends Config
         if (isset($_POST[$key])) {
             return $_POST[$key];
         }
-        if ($important) 
+        if ($important)
+            throw new Exception("$key parameter is missing", self::MISSING_PARAMS_CODE);
+        return null;
+    }
+
+    public static function receiveGET(string $key, bool $important = false): string
+    {
+        if (isset($_GET[$key])) {
+            return $_GET[$key];
+        }
+        if ($important)
             throw new Exception("$key parameter is missing", self::MISSING_PARAMS_CODE);
         return null;
     }
@@ -48,11 +69,11 @@ class API extends Config
         return date('Y-m-d H:i:s', time());
     }
 
-    public static function printError(Exception $e): void
+    public static function printError(Exception $e, string $message = null, int $code = -1): void
     {
         echo json_encode([
-            'status' => $e->getCode(),
-            'message' => $e->getMessage(),
+            'status' => $code != -1 ? $e->getCode() : $code,
+            'message' => $message != null ? $e->getMessage() : $message,
         ]);
     }
 

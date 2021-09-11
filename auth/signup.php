@@ -10,7 +10,9 @@ try {
     $auth = new PHPFastAuth(API::db());
     if (!$auth->isUserExistWithMobile($mobile)) {
         $signUp = new PHPFastAuth\SignUpWithMobile($mobile);
-        $signUp->setUid($uid);
+
+        // todo uncomment this in production
+        // $signUp->setUid($uid);
 
         $auth->forceSignUp($signUp);
     }
