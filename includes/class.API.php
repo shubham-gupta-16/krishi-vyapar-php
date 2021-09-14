@@ -1,5 +1,6 @@
 <?php
 header("Content-Type: application/json");
+require_once dirname(__FILE__) . '/config.php';
 
 class API
 {
@@ -11,8 +12,25 @@ class API
     const STATUS_OK_CODE = 200;
 
 
+    static $startTime = 0;
+    static $db = null;
+
+
+    public static function initResponseTime(): void
+    {
+        if (self::$startTime ==  0) {
+            self::$startTime = microtime(true) * 1000;
+        }
+    }
+    public static function getResponseTime(): float
+    {
+        $time = microtime(true) * 1000;
+        return $time - self::$startTime;
+    }
+
     public static function getAuthToken()
     {
+
         $headers = apache_request_headers();
         if (isset($headers['Auth'])) {
             return $headers['Auth'];
@@ -23,16 +41,15 @@ class API
 
     public static function db(): mysqli
     {
-        $config = parse_ini_file("config.ini");
-        if (!$config) {
-            throw new Exception("DB Config Error", self::DB_CONFIG_ERROR_CODE);
+        if (self::$db == null) {
+            $db = new mysqli(dbservername, dbuser, dbpassword, dbname);
+            $db->options(MYSQLI_OPT_INT_AND_FLOAT_NATIVE, TRUE);
+            self::$db = $db;
         }
-        $db = new mysqli($config['dbservername'], $config['dbuser'], $config['dbpassword'], $config['dbname']);
-        $db->options(MYSQLI_OPT_INT_AND_FLOAT_NATIVE, TRUE);
-        return $db;
+        return self::$db;
     }
 
-    public static function receivePOST(string $key, bool $important = false): string
+    public static function receivePOST(string $key, bool $important = false): ?string
     {
         // todo remove get => 
         if (isset($_GET[$key])) {
@@ -79,8 +96,8 @@ class API
 
     public static function printSuccess(array $array = []): void
     {
-        echo json_encode(array_merge($array, [
+        echo json_encode(array_merge([
             'status' => self::STATUS_OK_CODE,
-        ]));
+        ], $array));
     }
 }
