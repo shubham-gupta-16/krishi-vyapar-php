@@ -47,7 +47,6 @@ try {
     }
 
     API::printSuccess([
-        "time" => API::getResponseTime(),
         "locations" => $arr,
         "count" => $count
     ]);

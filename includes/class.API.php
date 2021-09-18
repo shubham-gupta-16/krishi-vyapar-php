@@ -22,7 +22,7 @@ class API
             self::$startTime = microtime(true) * 1000;
         }
     }
-    public static function getResponseTime(): float
+    private static function getResponseTime(): float
     {
         $time = microtime(true) * 1000;
         return $time - self::$startTime;
@@ -44,6 +44,7 @@ class API
         if (self::$db == null) {
             $db = new mysqli(dbservername, dbuser, dbpassword, dbname);
             $db->options(MYSQLI_OPT_INT_AND_FLOAT_NATIVE, TRUE);
+            $db->set_charset("utf8");
             self::$db = $db;
         }
         return self::$db;
@@ -98,6 +99,7 @@ class API
     {
         echo json_encode(array_merge([
             'status' => self::STATUS_OK_CODE,
+            'responseTime' => API::getResponseTime(),
         ], $array));
     }
 }
