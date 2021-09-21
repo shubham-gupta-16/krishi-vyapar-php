@@ -1,6 +1,7 @@
 <?php
 require_once dirname(__FILE__, 1) . "/includes/class.API.php";
 require_once dirname(__FILE__, 1) . "/libs/PHPFastAuth.php";
+require_once dirname(__FILE__, 1) . "/libs/PHPImageHandler.php";
 
 
 $__count = 0;
@@ -26,7 +27,7 @@ try {
 
     $createdAt = API::getCurrentTimeForMySQL();
 
-    $res = API::db()->query("INSERT INTO post_request (uid, title, description, price, quantity, unit, categoryId,
+    $res = API::db()->query("INSERT INTO part (uid, title, description, price, quantity, unit, categoryId,
      subCategoryId, tags, locText, loc, createdAt, type, extras) VALUES (
         '$uid', '$title', '$desc', '$price', '$quantity', '$unit', '$categoryId',
      '$subCategoryId', '', '$locText', POINT($lat, $lng), '$createdAt', 0, '$extras')");
@@ -34,8 +35,31 @@ try {
     if (!$res) {
         throw new Exception(API::UNKNOWN_ERROR_MSG, API::UNKNOWN_ERROR_CODE);
     }
+
+    $imageHandler = new PHPImageHandler(API::db(), dirname(__FILE__,2) . '/images');
+    $postID = getLastPostID(API::db());
+    $index = 1;
+    while (isset($_FILES['image_' . $index])) {
+        $newImage = PHPImageHandler\NewImage::for('part', $postID)->setFile($_FILES['image_' . $index]['tmp_name']);
+        $newImage->setMoreResolutions(360, 144);
+        $imageHandler->addImage($newImage);
+        $index++;
+    }
+
     API::printSuccess([
+        'files' => $_FILES
     ]);
 } catch (Exception $e) {
     API::printError($e, $e->getMessage() . " <$__count>");
+}
+
+function getLastPostID(mysqli $db) : int
+{
+    $qForID = "SELECT max(id) from part";
+    $idRes = $db->query($qForID);
+    if (!$idRes) {
+        return 0;
+    }
+    $nextID = $idRes->fetch_array()[0];
+    return $nextID;
 }

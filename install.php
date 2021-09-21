@@ -10,7 +10,7 @@ try {
 
     $db = API::db();
 
-    $post_request = "CREATE TABLE IF NOT EXISTS `post_request` (
+    $post_request = "CREATE TABLE IF NOT EXISTS `part` (
         `id` INT(11) NOT NULL AUTO_INCREMENT ,
         `uid` VARCHAR(255) NOT NULL ,
         `title` VARCHAR(255) NOT NULL ,

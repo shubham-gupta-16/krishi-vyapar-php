@@ -2,8 +2,8 @@
 require_once dirname(__FILE__, 1) . "/includes/class.API.php";
 require_once dirname(__FILE__, 1) . "/libs/PHPFastAuth.php";
 
-const CATEGORY_VERSION = 7;
-const SUB_CATEGORY_VERSION = 7;
+const CATEGORY_VERSION = 8;
+const SUB_CATEGORY_VERSION = 8;
 
 $__count = 0;
 try {

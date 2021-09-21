@@ -1,6 +1,6 @@
 <?php
 
-require_once './cList2.php';
+require_once './final_cat_list.php';
 
 require_once dirname(__FILE__, 1) . '/includes/class.API.php';
 
